@@ -1,0 +1,32 @@
+{
+  "name": "kudos",
+  "version": "1.0.0",
+  "description": "Kudos application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/desolint/kudos.git"
+  },
+  "author": "Muneeb Ahmed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/desolint/kudos/issues"
+  },
+  "homepage": "https://github.com/desolint/kudos#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^6.14.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
