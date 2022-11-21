@@ -1,19 +1,19 @@
-const jwt = require('jsonwebtoken');
-const {isValidObjectId} = require('mongoose');
-const AppError = require('../utils/error');
-const admins = require('../models/admin');
-const users = require('../models/user');
+const jwt = require("jsonwebtoken");
+const { isValidObjectId } = require("mongoose");
+const AppError = require("../utils/error");
+const admins = require("../models/admin");
+const users = require("../models/user");
 
 const signAndSendToken = (id, admin, res) => {
-  const token = jwt.sign({id}, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_ADMIN,
   });
 
   admin.password = undefined;
 
   res.status(200).json({
-    status: 'success',
-    message: 'Logged in successfully',
+    status: "success",
+    message: "Logged in successfully",
     token,
     admin: admin,
   });
@@ -21,7 +21,7 @@ const signAndSendToken = (id, admin, res) => {
 
 exports.createAdmin = async (req, res, next) => {
   try {
-    const {name, email, password, phoneNumber} = req.body;
+    const { name, email, password, phoneNumber } = req.body;
     console.log(req.body);
     const newAdmin = await admins.create({
       name,
@@ -31,8 +31,8 @@ exports.createAdmin = async (req, res, next) => {
     });
 
     res.status(201).json({
-      status: 'success',
-      message: 'Admin created successfully',
+      status: "success",
+      message: "Admin created successfully",
       admin: newAdmin,
     });
   } catch (err) {
@@ -42,12 +42,12 @@ exports.createAdmin = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const {email, password} = req.body;
-    const admin = await admins.findOne({email});
+    const { email, password } = req.body;
+    const admin = await admins.findOne({ email });
     if (admin && admin.password === password) {
       signAndSendToken(admin._id, admin, res);
     } else {
-      const error = new AppError('Email or password is wrong', 401);
+      const error = new AppError("Email or password is wrong", 401);
       return next(error);
     }
   } catch (err) {
@@ -62,12 +62,12 @@ exports.createNewEmployee = async (req, res, next) => {
       email,
       password,
       phoneNumber,
-      role = 'employee',
-      kudos = '0',
+      role = "employee",
+      kudos = "0",
     } = req.body;
-    const existingUser = await users.findOne({email});
+    const existingUser = await users.findOne({ email });
     if (existingUser) {
-      return next(new AppError('Employee with this email already exists', 400));
+      return next(new AppError("Employee with this email already exists", 400));
     }
     const newUser = await users.create({
       name,
@@ -87,8 +87,8 @@ exports.createNewEmployee = async (req, res, next) => {
     };
 
     res.status(201).json({
-      status: 'success',
-      message: 'Employee created successfully',
+      status: "success",
+      message: "Employee created successfully",
       employee,
     });
   } catch (err) {
@@ -114,8 +114,8 @@ exports.getAllEmployees = async (req, res, next) => {
       };
     });
     res.status(200).json({
-      status: 'success',
-      message: 'List of al the employees',
+      status: "success",
+      message: "List of al the employees",
       members: beautifiedEmployees,
     });
   } catch (err) {
@@ -125,12 +125,12 @@ exports.getAllEmployees = async (req, res, next) => {
 
 exports.updateEmployee = async (req, res, next) => {
   try {
-    const {name, email, phoneNumber, role, kudos} = req.body;
+    const { name, email, phoneNumber, role, kudos } = req.body;
     const userId = req.params.memberId;
     if (!isValidObjectId(userId)) {
       return next(
         new AppError(
-          'Invalid User Id. Please refresh the page and try again',
+          "Invalid User Id. Please refresh the page and try again",
           401
         )
       );
@@ -138,19 +138,19 @@ exports.updateEmployee = async (req, res, next) => {
     const employee = await users.findById(userId);
     if (!employee) {
       return next(
-        new AppError('No user found with this id. Please refresh the page', 404)
+        new AppError("No user found with this id. Please refresh the page", 404)
       );
     }
 
     const alreadyExistingEmail = await users.findOne({
       email,
-      _id: {$ne: userId},
+      _id: { $ne: userId },
     });
 
     if (alreadyExistingEmail) {
       return next(
         new AppError(
-          'This email belongs to another account. Please try another email',
+          "This email belongs to another account. Please try another email",
           401
         )
       );
@@ -160,16 +160,16 @@ exports.updateEmployee = async (req, res, next) => {
     employee.email = email;
     employee.phoneNumber = phoneNumber;
     employee.role = role ?? employee.role;
-    employee.kudos = kudos || employee.kudos;
+    employee.kudos = kudos === "" ? 0 : kudos;
     const updatedEmployee = await employee.save();
 
     res.status(200).json({
-      status: 'success',
-      message: 'Employee updated Successfully',
+      status: "success",
+      message: "Employee updated Successfully",
       updatedEmployee,
     });
   } catch (err) {
-    if (err.errors.role && err.errors.role.kind === 'enum') {
+    if (err.errors.role && err.errors.role.kind === "enum") {
       return next(
         new AppError(
           `${err.errors.role.value} role cannot be assigned to a user account. User account can either be a 'manager' or 'employee'`,
@@ -177,20 +177,20 @@ exports.updateEmployee = async (req, res, next) => {
         )
       );
     } else {
-      return next(new AppError('Something went wrong', 401));
+      return next(new AppError("Something went wrong", 401));
     }
   }
 };
 
 exports.deleteEmployee = async (req, res, next) => {
   try {
-    const {email} = req.params;
+    const { email } = req.params;
 
-    await users.findOneAndDelete({email});
+    await users.findOneAndDelete({ email });
 
     res.status(200).json({
-      status: 'success',
-      message: 'User deleted successuflly',
+      status: "success",
+      message: "User deleted successuflly",
     });
   } catch (err) {
     return next(new AppError(err.message, 500));
